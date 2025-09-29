@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Instrutores{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Lista de Instrutores</h1>
+    <p>Consulte e gerencie os instrutores cadastrados na escola.</p>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3>Instrutores Cadastrados</h3>
+        
+        {% if current_user.role in ['programador', 'admin_escola'] %}
+        <div class="header-actions">
+            <a href="{{ url_for('main.pre_cadastro', role='instrutor') }}" class="btn btn-info">
+                <span>+</span> Inserir Pré-Cadastro
+            </a>
+            <a href="{{ url_for('instrutor.cadastrar_instrutor') }}" class="btn btn-primary">
+                <span>+</span> Cadastrar Novo Instrutor
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="table-responsive">
+        {% if instrutores %}
+            <table class="table-styled">
+                <thead>
+                    <tr>
+                        <th>Matrícula</th>
+                        <th>Nome de Guerra</th>
+                        <th>Nome Completo</th>
+                        <th>Posto/Graduação</th>
+                        <th>E-mail</th>
+                        {% if current_user.role in ['programador', 'admin_escola'] %}
+                        <th class="text-right">Ações</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for instrutor in instrutores %}
+                    <tr>
+                        <td data-label="Matrícula">{{ instrutor.user.matricula if instrutor.user else 'N/A' }}</td>
+                        <td data-label="Nome de Guerra">{{ instrutor.user.nome_de_guerra if instrutor.user else 'N/A' }}</td>
+                        <td data-label="Nome Completo">{{ instrutor.user.nome_completo if instrutor.user else 'N/A' }}</td>
+                        <td data-label="Posto/Graduação">{{ instrutor.posto_graduacao or 'N/D' }}</td>
+                        <td data-label="Email">{{ instrutor.user.email if instrutor.user else 'N/A' }}</td>
+                        {% if current_user.role in ['programador', 'admin_escola'] %}
+                        <td data-label="Ações" class="text-right">
+                            <div class="btn-group">
+                                <a href="{{ url_for('instrutor.editar_instrutor', instrutor_id=instrutor.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                                <form method="POST" action="{{ url_for('instrutor.excluir_instrutor', instrutor_id=instrutor.id) }}" onsubmit="return confirm('Tem certeza que deseja excluir este instrutor? Esta ação não pode ser desfeita.');" style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                                </form>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">🎓</div>
+                <h2>Nenhum Instrutor Encontrado</h2>
+                <p>Nenhum instrutor cadastrado no sistema. Utilize os botões acima para começar.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
